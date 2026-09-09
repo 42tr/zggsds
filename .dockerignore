@@ -1,0 +1,8 @@
+.git
+.github
+target
+data
+*.db
+*.sqlite
+*.sqlite3
+build.sh
