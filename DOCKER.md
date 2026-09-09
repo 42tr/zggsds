@@ -5,8 +5,10 @@
 ### GitHub Actions 发布
 
 仅推送 tag 时触发工作流；普通分支推送和 PR 不触发。
-Rust 格式检查、编译检查和测试通过后，构建 `linux/amd64`、`linux/arm64`
-双架构镜像，并推送到：
+Rust 检查任务与两个原生编译任务并行运行：`ubuntu-24.04` 编译 amd64，
+`ubuntu-24.04-arm` 编译 arm64，各自缓存 Cargo 依赖和编译产物。
+全部通过后，下载二进制产物，使用 `Dockerfile.release` 打包
+`linux/amd64`、`linux/arm64` 双架构镜像，并推送到：
 
 - `ghcr.io/42tr/zggsds`
 - `crpi-gz6f3ok0ezphywc8.cn-shanghai.personal.cr.aliyuncs.com/42tr/zggsds`
@@ -17,6 +19,10 @@ Rust 格式检查、编译检查和测试通过后，构建 `linux/amd64`、`lin
 在本仓库的 Actions Secrets 中配置 `ALIYUN_REGISTRY_USERNAME` 和
 `ALIYUN_REGISTRY_PASSWORD`，并确保该账号有目标 ACR 仓库的推送权限。
 GHCR 使用工作流自带的 `GITHUB_TOKEN`。
+
+发布镜像使用 Ubuntu 24.04，与原生编译环境的 glibc 版本匹配。
+打包阶段只复制二进制、创建数据目录，不执行容器内命令，无需 QEMU。
+本地 `docker build .` 仍使用下面的多阶段 Dockerfile 从源码编译。
 
 ### 使用 Docker 构建
 
