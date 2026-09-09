@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 工时管理系统</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+        .login-container .form-group {
+            margin-bottom: 20px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .login-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .login-container .register-link {
+            text-align: center;
+            margin-top: 16px;
+            color: #667eea;
+            cursor: pointer;
+        }
+        .login-container .register-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>工时管理系统</h1>
+        <form id="login-form">
+            <div class="form-group">
+                <label>用户名:</label>
+                <input type="text" id="login-username" required>
+            </div>
+            <div class="form-group">
+                <label>密码:</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit">登录</button>
+        </form>
+        <div class="register-link" onclick="window.location.href='register.html'">
+            没有账号？提交注册申请
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const response = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('login-username').value,
+                    password: document.getElementById('login-password').value
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('user', JSON.stringify(data));
+                window.location.href = '/';
+            } else {
+                const error = await response.text();
+                alert('登录失败: ' + error);
+            }
+        });
+    </script>
+</body>
+</html>

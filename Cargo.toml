@@ -1,0 +1,20 @@
+[package]
+name = "zggsds"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+sea-orm = { version = "1.0", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"
+uuid = { version = "1", features = ["v4", "serde"] }
+rust-embed = "8"
+mime_guess = "2"
+jsonwebtoken = "9"
+bcrypt = "0.15"
+tower-http = { version = "0.5", features = ["cors"] }
+rust_xlsxwriter = "0.74"
+percent-encoding = "2"

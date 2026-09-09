@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>注册 - 工时管理系统</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .register-container {
+      max-width: 520px;
+      margin: 60px auto;
+      padding: 32px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+    .register-container h1 {
+      text-align: center;
+      margin-bottom: 22px;
+      color: #667eea;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .row .form-group {
+      flex: 1;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.25);
+    }
+    .hint {
+      color: #666;
+      font-size: 13px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    .links {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #667eea;
+    }
+    .links a { color: #667eea; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h1>注册申请</h1>
+
+    <form id="register-form">
+      <div class="row">
+        <div class="form-group">
+          <label>用户名:</label>
+          <input type="text" id="reg-username" required />
+        </div>
+        <div class="form-group">
+          <label>邮箱:</label>
+          <input type="email" id="reg-email" required />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>密码:</label>
+          <input type="password" id="reg-password" required />
+        </div>
+        <div class="form-group">
+          <label>确认密码:</label>
+          <input type="password" id="reg-password2" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>部门:</label>
+        <select id="reg-dept" required></select>
+      </div>
+
+      <button type="submit">提交注册申请</button>
+
+      <div class="hint" id="reg-hint">
+        提交后需要部门负责人或管理员审批，通过后才能登录。
+      </div>
+
+      <div class="links">
+        <a href="login.html">返回登录</a>
+        <a href="#" id="check-status">查询申请状态</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const API_BASE = '';
+
+    async function loadDepartments() {
+      const resp = await fetch(`${API_BASE}/public/departments/flat`);
+      if (!resp.ok) {
+        const msg = await resp.text();
+        alert('获取部门失败: ' + msg);
+        return;
+      }
+      const list = await resp.json();
+      const sel = document.getElementById('reg-dept');
+      sel.innerHTML = '';
+
+      // 占位：强制用户选择，避免默认选到“公司”等顶层部门造成误提交
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '请选择部门';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      sel.appendChild(placeholder);
+
+      const arr = Array.isArray(list) ? list : [];
+      arr.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+      arr.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const password2 = document.getElementById('reg-password2').value;
+      const department_id = parseInt(document.getElementById('reg-dept').value, 10);
+
+      if (!department_id || Number.isNaN(department_id)) {
+        alert('请选择部门');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('密码至少 6 位');
+        return;
+      }
+      if (password !== password2) {
+        alert('两次输入的密码不一致');
+        return;
+      }
+
+      const resp = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, department_id })
+      });
+
+      const text = await resp.text();
+      if (!resp.ok) {
+        alert('提交失败: ' + text.replace(/"/g, ''));
+        return;
+      }
+
+      const data = JSON.parse(text);
+      localStorage.setItem('registration_request_id', String(data.request_id));
+      alert(`提交成功，申请单号：${data.request_id}。请等待审批。`);
+    });
+
+    document.getElementById('check-status').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('reg-email').value.trim();
+      const requestId = localStorage.getItem('registration_request_id');
+      if (!email) {
+        alert('先填写邮箱，再查询状态');
+        return;
+      }
+      if (!requestId) {
+        alert('请使用提交注册申请的浏览器查询，或先重新提交申请');
+        return;
+      }
+      const resp = await fetch(`${API_BASE}/auth/register/status?request_id=${encodeURIComponent(requestId)}&email=${encodeURIComponent(email)}`);
+      const txt = await resp.text();
+      if (!resp.ok) {
+        alert('查询失败: ' + txt.replace(/"/g, ''));
+        return;
+      }
+      const data = JSON.parse(txt);
+      let msg = `申请单号：${data.request_id}\n状态：${data.status}`;
+      if (data.reject_reason) msg += `\n原因：${data.reject_reason}`;
+      alert(msg);
+    });
+
+    loadDepartments();
+  </script>
+</body>
+</html>

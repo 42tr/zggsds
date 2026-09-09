@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工时管理系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1>工时管理系统</h1>
+                <div class="header-info">
+                    <span id="current-user"></span>
+                    <button type="button" onclick="openChangePasswordModal()">改密码</button>
+                    <button onclick="logout()">退出</button>
+                </div>
+            </div>
+            <nav>
+                <button id="nav-dashboard" onclick="showSection('dashboard')">首页</button>
+                <button id="nav-time-entries" onclick="showSection('time-entries')">工时录入</button>
+                <button id="nav-projects" onclick="showSection('projects')">项目管理</button>
+                <button id="nav-departments" onclick="showSection('departments')">部门管理</button>
+                <button id="nav-users" onclick="showSection('users')">用户管理</button>
+                <button id="nav-approvals" onclick="showSection('approvals')">审批管理</button>
+            </nav>
+        </header>
+
+        <main>
+
+
+            <!-- 修改密码弹窗 -->
+            <div id="change-password-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>修改密码</h3>
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label>旧密码:</label>
+                            <input type="password" id="cp-old-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>新密码:</label>
+                            <input type="password" id="cp-new-password" required minlength="6" placeholder="至少6位">
+                        </div>
+                        <div class="form-group">
+                            <label>确认新密码:</label>
+                            <input type="password" id="cp-new-password2" required minlength="6">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">保存</button>
+                            <button type="button" onclick="closeChangePasswordModal()">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 编辑用户弹窗 -->
+            <div id="edit-user-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>编辑用户</h3>
+                    <form id="edit-user-form">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="form-group">
+                            <label>用户名:</label>
+                            <input type="text" id="edit-user-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>邮箱:</label>
+                            <input type="email" id="edit-user-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>密码:</label>
+                            <input type="password" id="edit-user-password" placeholder="不修改密码请留空">
+                        </div>
+                        <div class="form-group">
+                            <label>角色:</label>
+                            <select id="edit-user-role" required>
+                                <option value="employee">员工</option>
+                                <option value="dept_manager">部门负责人</option>
+                                <option value="project_manager">项目负责人</option>
+                                <option value="timekeeper">工时管理员</option>
+                                <option value="admin">系统管理员</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>部门:</label>
+                            <select id="edit-user-department-id">
+                                <option value="">无部门</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">保存</button>
+                            <button type="button" onclick="closeEditUserModal()">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 编辑工时弹窗 -->
+            <div id="edit-time-entry-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>编辑工时</h3>
+                    <form id="edit-time-entry-form">
+                        <input type="hidden" id="edit-entry-id">
+                        <div class="form-group">
+                            <label>项目:</label>
+                            <select id="edit-entry-project-id" class="native-project-select">
+                                <option value="" disabled selected>请选择项目</option>
+                            </select>
+                            <div id="edit-entry-project-picker" class="project-picker"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>日期:</label>
+                            <input type="date" id="edit-entry-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>工时:</label>
+                            <input type="number" step="0.5" id="edit-entry-hours" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>描述:</label>
+                            <textarea id="edit-entry-description" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">保存</button>
+                            <button type="button" onclick="closeEditTimeEntryModal()">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 编辑项目弹窗 -->
+            <div id="edit-project-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>编辑项目</h3>
+                    <form id="edit-project-form">
+                        <input type="hidden" id="edit-project-id">
+                        <div class="form-group">
+                            <label>项目编号:</label>
+                            <input type="text" id="edit-project-no" placeholder="可选">
+                        </div>
+                        <div class="form-group">
+                            <label>项目名称:</label>
+                            <input type="text" id="edit-project-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>项目类型:</label>
+                            <select id="edit-project-type" required>
+                                <option value="交付">交付</option>
+                                <option value="研发">研发</option>
+                                <option value="售前">售前</option>
+                                <option value="售后">售后</option>
+                                <option value="事务">事务</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>项目状态:</label>
+                            <select id="edit-project-status" required>
+                                <option value="进行中">进行中</option>
+                                <option value="完结">完结</option>
+                                <option value="终止">终止</option>
+                                <option value="中止">中止</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>项目周期:</label>
+                            <input type="text" id="edit-project-cycle" placeholder="如：2026-01 至 2026-06">
+                        </div>
+                        <div class="form-group">
+                            <label>项目负责人:</label>
+                            <select id="edit-project-owner">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>项目描述:</label>
+                            <textarea id="edit-project-description"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">保存</button>
+                            <button type="button" onclick="closeEditProjectModal()">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 编辑部门弹窗 -->
+            <div id="edit-dept-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>编辑部门</h3>
+                    <form id="edit-dept-form">
+                        <input type="hidden" id="edit-dept-id">
+                        <div class="form-group">
+                            <label>部门名称:</label>
+                            <input type="text" id="edit-dept-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>上级部门:</label>
+                            <select id="edit-dept-parent-id">
+                                <option value="">无上级部门</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">保存</button>
+                            <button type="button" onclick="closeEditDeptModal()">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 首页 -->
+            <section id="dashboard" class="active">
+                <h2>数据统计</h2>
+                <div class="filter-section" style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>所属月份</label>
+                            <input type="month" id="dashboard-month">
+                        </div>
+                        <button type="button" onclick="loadDashboard()">查询</button>
+                        <button type="button" onclick="clearDashboardFilter()">重置</button>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>总工时</h3>
+                        <p id="total-hours">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>待审批</h3>
+                        <p id="pending-approvals">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>项目数</h3>
+                        <p id="total-projects">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>用户数</h3>
+                        <p id="total-users">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 工时录入 -->
+            <section id="time-entries">
+                <h2>工时录入</h2>
+                <div class="entry-mode-switch">
+                    <button type="button" id="entry-mode-single" class="active" onclick="switchEntryMode('single')">单条录入</button>
+                    <button type="button" id="entry-mode-weekly" onclick="switchEntryMode('weekly')">按周批量录入</button>
+                </div>
+
+                <div id="single-entry-panel">
+                    <form id="time-entry-form">
+                        <div class="form-group">
+                            <label>项目:</label>
+                            <select id="entry-project-id" class="native-project-select">
+                                <option value="" disabled selected>请选择项目</option>
+                            </select>
+                            <div id="entry-project-picker" class="project-picker"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>日期:</label>
+                            <input type="date" id="entry-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>工时:</label>
+                            <input type="number" step="0.5" id="entry-hours" required min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>描述:</label>
+                            <textarea id="entry-description" required></textarea>
+                        </div>
+                        <button type="submit">提交工时</button>
+                    </form>
+                </div>
+
+                <div id="weekly-entry-panel" class="hidden">
+                    <div class="filter-section week-toolbar">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>周起始日（周一）:</label>
+                            <input type="date" id="week-start-date">
+                        </div>
+                        <button type="button" onclick="copyLastWeekToGrid()" style="background: #17a2b8;">复制上周</button>
+                        <button type="button" onclick="addWeekRow()">新增项目行</button>
+                        <button type="button" onclick="submitWeekEntries()" style="background: #28a745;">提交本周工时</button>
+                    </div>
+                    <div id="week-range-tip" class="week-range-tip"></div>
+                    <div class="week-grid-wrap">
+                        <table id="week-entry-table">
+                            <thead>
+                                <tr>
+                                    <th>项目</th>
+                                    <th>描述</th>
+                                    <th>周一</th>
+                                    <th>周二</th>
+                                    <th>周三</th>
+                                    <th>周四</th>
+                                    <th>周五</th>
+                                    <th>周六</th>
+                                    <th>周日</th>
+                                    <th>合计</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr id="week-total-row">
+                                    <td>每日合计</td>
+                                    <td>-</td>
+                                    <td data-day-index="0">0</td>
+                                    <td data-day-index="1">0</td>
+                                    <td data-day-index="2">0</td>
+                                    <td data-day-index="3">0</td>
+                                    <td data-day-index="4">0</td>
+                                    <td data-day-index="5">0</td>
+                                    <td data-day-index="6">0</td>
+                                    <td id="week-total-all">0</td>
+                                    <td>-</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div id="week-warning" class="week-warning"></div>
+                </div>
+
+                <h3>工时记录</h3>
+                <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; border: 1px solid #dee2e6;">
+                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>用户:</label>
+                            <select id="filter-user-id" style="min-width: 150px;">
+                                <option value="">全部</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>项目:</label>
+                            <select id="filter-project-id" style="min-width: 150px;">
+                                <option value="">全部</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>所属月份:</label>
+                            <input type="month" id="filter-month">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>开始日期:</label>
+                            <input type="date" id="filter-start-date">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>结束日期:</label>
+                            <input type="date" id="filter-end-date">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>每页显示:</label>
+                            <select id="page-size">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="loadTimeEntries()">查询</button>
+                        <button type="button" onclick="filterLastWeek()" style="background: #17a2b8;">上周工时</button>
+                        <button type="button" onclick="clearTimeEntryFilter()" style="background: #6c757d;">重置</button>
+                        <button type="button" onclick="exportTimeEntries()" style="background: #28a745;">导出Excel</button>
+                    </div>
+                </div>
+
+                <table id="time-entries-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>用户</th>
+                            <th>项目编号</th>
+                            <th>项目名称</th>
+                            <th>工时</th>
+                            <th>描述</th>
+                            <th>状态</th>
+                            <th>修改记录</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="pagination" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="pagination-info"></span>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" id="prev-page" onclick="prevPage()" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">上一页</button>
+                        <button type="button" id="next-page" onclick="nextPage()" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">下一页</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 项目管理 -->
+            <section id="projects">
+                <h2>项目管理</h2>
+                <!-- 新增表单仅 timekeeper/admin 可见，由 JS 控制 -->
+                <div id="project-form-wrap">
+                    <form id="project-form">
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目编号:</label>
+                                <input type="text" id="project-no" placeholder="可选">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目名称:</label>
+                                <input type="text" id="project-name" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目类型:</label>
+                                <select id="project-type" required>
+                                    <option value="交付">交付</option>
+                                    <option value="研发">研发</option>
+                                    <option value="售前">售前</option>
+                                    <option value="售后">售后</option>
+                                    <option value="事务">事务</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目状态:</label>
+                                <select id="project-status" required>
+                                    <option value="进行中">进行中</option>
+                                    <option value="完结">完结</option>
+                                    <option value="终止">终止</option>
+                                    <option value="中止">中止</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目周期:</label>
+                                <input type="text" id="project-cycle" placeholder="如：2026-01 至 2026-06">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>项目负责人:</label>
+                                <select id="project-owner">
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>描述:</label>
+                                <textarea id="project-description" style="height:36px;"></textarea>
+                            </div>
+                            <button type="submit">创建项目</button>
+                        </div>
+                    </form>
+                </div>
+
+                <h3>项目列表</h3>
+                <table id="projects-table">
+                    <thead>
+                        <tr>
+                            <th>项目编号</th>
+                            <th>项目名称</th>
+                            <th>项目类型</th>
+                            <th>项目状态</th>
+                            <th>项目周期</th>
+                            <th>项目负责人</th>
+                            <th>项目描述</th>
+                            <th id="projects-action-col" style="display:none;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- 部门管理 -->
+            <section id="departments">
+                <h2>部门管理</h2>
+                <div id="department-form-wrap">
+                    <form id="department-form">
+                        <div class="form-group">
+                            <label>部门名称:</label>
+                            <input type="text" id="dept-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>上级部门:</label>
+                            <select id="dept-parent-id">
+                                <option value="">无上级部门</option>
+                            </select>
+                        </div>
+                        <button type="submit">创建部门</button>
+                    </form>
+                </div>
+
+                <h3>部门树形结构</h3>
+                <div id="department-tree"></div>
+            </section>
+
+            <!-- 用户管理 -->
+            <section id="users">
+                <h2>用户管理</h2>
+                <form id="user-form">
+                    <div class="form-group">
+                        <label>用户名:</label>
+                        <input type="text" id="user-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱:</label>
+                        <input type="email" id="user-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码:</label>
+                        <input type="password" id="user-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>角色:</label>
+                        <select id="user-role" required>
+                            <option value="employee">员工</option>
+                            <option value="dept_manager">部门负责人</option>
+                            <option value="project_manager">项目负责人</option>
+                            <option value="timekeeper">工时管理员</option>
+                            <option value="admin">系统管理员</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>部门:</label>
+                        <select id="user-department-id">
+                            <option value="">无部门</option>
+                        </select>
+                    </div>
+                    <button type="submit">创建用户</button>
+                </form>
+
+                <h3>用户列表</h3>
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>角色</th>
+                            <th>部门</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- 审批管理 -->
+            <section id="approvals">
+                <h2>审批管理</h2>
+
+                <div style="display:flex; gap:8px; margin: 10px 0; flex-wrap: wrap;">
+                    <button type="button" id="btn-approval-time" onclick="switchApprovalTab('time')">工时审批</button>
+                    <button type="button" id="btn-approval-register" onclick="switchApprovalTab('register')">注册审批</button>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <span id="approval-stage-tip" style="color:#6c757d; font-size: 13px;"></span>
+                </div>
+
+                <!-- 工时审批表 -->
+                <table id="approvals-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户</th>
+                            <th>项目</th>
+                            <th>日期</th>
+                            <th>工时</th>
+                            <th>描述</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <!-- 注册审批表 -->
+                <table id="reg-approvals-table" style="display:none; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>部门ID</th>
+                            <th>分配给</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
