@@ -1,4 +1,9 @@
-use axum::{extract::State, http::{header, HeaderValue}, response::IntoResponse, Json};
+use axum::{
+    extract::State,
+    http::{header, HeaderValue},
+    response::IntoResponse,
+    Json,
+};
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
@@ -40,15 +45,30 @@ pub async fn login(
 
     let token = create_token(user.id, &user.username, &user.role);
 
-    Ok(([(header::SET_COOKIE, HeaderValue::from_str(&format!("access_token={token}; HttpOnly; SameSite=Lax; Path=/")).unwrap())], Json(LoginResponse {
-        user_id: user.id,
-        username: user.username,
-        role: user.role,
-    })))
+    Ok((
+        [(
+            header::SET_COOKIE,
+            HeaderValue::from_str(&format!(
+                "access_token={token}; HttpOnly; SameSite=Lax; Path=/"
+            ))
+            .unwrap(),
+        )],
+        Json(LoginResponse {
+            user_id: user.id,
+            username: user.username,
+            role: user.role,
+        }),
+    ))
 }
 
 pub async fn logout() -> impl IntoResponse {
-    ([(header::SET_COOKIE, "access_token=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/")], Json("ok"))
+    (
+        [(
+            header::SET_COOKIE,
+            "access_token=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/",
+        )],
+        Json("ok"),
+    )
 }
 
 #[derive(Deserialize)]

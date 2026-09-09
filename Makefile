@@ -11,6 +11,8 @@ run:
 		-p 3000:3000 \
 		-v $(PWD)/data:/app/data \
 		-e RUST_LOG=info \
+		-e JWT_SECRET \
+		-e ADMIN_PASSWORD \
 		--restart unless-stopped \
 		zggsds:latest
 

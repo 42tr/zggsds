@@ -18,6 +18,10 @@ docker-compose build
 
 ### 使用 Docker 运行
 
+先在当前 shell 中设置 `JWT_SECRET`（建议至少 32 字节随机值）和
+`ADMIN_PASSWORD`（首次初始化管理员时必填，至少 12 位），并 export。
+`make run` 和 Docker Compose 也会读取这两个环境变量。
+
 ```bash
 # 创建数据目录
 mkdir -p ./data
@@ -28,6 +32,8 @@ docker run -d \
   -p 3000:3000 \
   -v $(pwd)/data:/app/data \
   -e RUST_LOG=info \
+  -e JWT_SECRET \
+  -e ADMIN_PASSWORD \
   --restart unless-stopped \
   zggsds:latest
 ```
@@ -62,7 +68,7 @@ docker-compose down
 
 本项目使用多阶段构建（Multi-stage build）策略：
 
-1. **构建阶段** (rust:1.82-slim)
+1. **构建阶段** (rust:1.83-slim)
    - 完整的 Rust 工具链
    - 构建依赖和二进制文件
    - 利用 Docker 缓存层加速构建
@@ -97,10 +103,10 @@ volumes:
 
 ## 健康检查
 
-容器内置健康检查，每 30 秒检查一次服务状态：
+镜像目前未配置 Docker HEALTHCHECK。可在宿主机检查 HTTP 服务是否响应：
 
 ```bash
-docker inspect --format='{{json .State.Health}}' zggsds
+curl --fail http://localhost:3000/ > /dev/null
 ```
 
 ## 生产环境建议

@@ -194,12 +194,12 @@ function getCurrentWeekStart() {
 }
 
 function checkAuth() {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // Cookie 由浏览器携带，实际登录状态由 API 校验；这里仅检查展示用用户信息。
+    const user = getCurrentUser();
+    if (!user.user_id || !user.username || !user.role) {
         window.location.href = 'login.html';
         return;
     }
-    const user = getCurrentUser();
     document.getElementById('current-user').textContent = `${user.username} (${ROLE_MAP[user.role] || user.role})`;
 
     const role = user.role;

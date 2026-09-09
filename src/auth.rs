@@ -6,7 +6,11 @@ use axum::{
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, sync::{Mutex, OnceLock}, time::{Duration as StdDuration, Instant}};
+use std::{
+    collections::HashMap,
+    sync::{Mutex, OnceLock},
+    time::{Duration as StdDuration, Instant},
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -26,17 +30,22 @@ static RATE_LIMIT: OnceLock<Mutex<HashMap<String, Vec<Instant>>>> = OnceLock::ne
 pub fn allow_auth_attempt(key: &str) -> bool {
     let now = Instant::now();
     let cutoff = now - StdDuration::from_secs(60);
-    let mut all = RATE_LIMIT.get_or_init(|| Mutex::new(HashMap::new())).lock().unwrap();
+    let mut all = RATE_LIMIT
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap();
     let attempts = all.entry(key.to_lowercase()).or_default();
     attempts.retain(|at| *at > cutoff);
-    if attempts.len() >= 10 { return false; }
+    if attempts.len() >= 10 {
+        return false;
+    }
     attempts.push(now);
     true
 }
 
 fn jwt_secret() -> String {
-    let secret = std::env::var("JWT_SECRET")
-        .expect("JWT_SECRET must be set to a strong random value");
+    let secret =
+        std::env::var("JWT_SECRET").expect("JWT_SECRET must be set to a strong random value");
     if secret.trim().is_empty() {
         panic!("JWT_SECRET must not be empty");
     }
@@ -94,12 +103,18 @@ where
             .get("Authorization")
             .and_then(|h| h.to_str().ok())
             .map(str::to_owned)
-            .or_else(|| parts.headers.get("Cookie").and_then(|h| h.to_str().ok()).and_then(|cookies| {
-                cookies.split(';').find_map(|cookie| {
-                    let (name, value) = cookie.trim().split_once('=')?;
-                    (name == "access_token").then(|| format!("Bearer {value}"))
-                })
-            }))
+            .or_else(|| {
+                parts
+                    .headers
+                    .get("Cookie")
+                    .and_then(|h| h.to_str().ok())
+                    .and_then(|cookies| {
+                        cookies.split(';').find_map(|cookie| {
+                            let (name, value) = cookie.trim().split_once('=')?;
+                            (name == "access_token").then(|| format!("Bearer {value}"))
+                        })
+                    })
+            })
             .ok_or(StatusCode::UNAUTHORIZED)?;
 
         if !auth_header.starts_with("Bearer ") {
