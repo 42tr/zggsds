@@ -1,6 +1,7 @@
+use crate::error::ApiError;
 use axum::{
     extract::State,
-    http::{header, HeaderValue},
+    http::{header, HeaderValue, StatusCode},
     response::IntoResponse,
     Json,
 };
@@ -27,20 +28,26 @@ pub struct LoginResponse {
 pub async fn login(
     State(db): State<DatabaseConnection>,
     Json(payload): Json<LoginRequest>,
-) -> Result<impl IntoResponse, String> {
+) -> Result<impl IntoResponse, ApiError> {
     if !allow_auth_attempt(&format!("login:{}", payload.username.trim())) {
-        return Err("登录尝试过于频繁，请稍后再试".to_string());
+        return Err(ApiError(
+            StatusCode::TOO_MANY_REQUESTS,
+            "登录尝试过于频繁，请稍后再试".into(),
+        ));
     }
     let user = User::find()
         .filter(crate::models::user::Column::Username.eq(&payload.username))
         .filter(crate::models::user::Column::DeletedAt.is_null())
         .one(&db)
         .await
-        .map_err(|_| "登录失败".to_string())?
-        .ok_or("用户名或密码错误")?;
+        .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "登录失败".into()))?
+        .ok_or_else(|| ApiError(StatusCode::UNAUTHORIZED, "用户名或密码错误".into()))?;
 
     if !verify_password(&payload.password, &user.password_hash) {
-        return Err("用户名或密码错误".to_string());
+        return Err(ApiError(
+            StatusCode::UNAUTHORIZED,
+            "用户名或密码错误".into(),
+        ));
     }
 
     let token = create_token(user.id, &user.username, &user.role);
@@ -81,9 +88,9 @@ pub async fn change_password(
     auth: AuthUser,
     State(db): State<DatabaseConnection>,
     Json(payload): Json<ChangePasswordRequest>,
-) -> Result<Json<String>, String> {
+) -> Result<Json<String>, ApiError> {
     if payload.new_password.trim().len() < 6 {
-        return Err("新密码至少 6 位".to_string());
+        return Err("新密码至少 6 位".into());
     }
 
     let user_model = User::find_by_id(auth.user_id)
@@ -94,12 +101,12 @@ pub async fn change_password(
         .ok_or("User not found")?;
 
     if !verify_password(&payload.old_password, &user_model.password_hash) {
-        return Err("旧密码不正确".to_string());
+        return Err("旧密码不正确".into());
     }
 
     // 避免新旧密码相同（可选，但挺合理）
     if verify_password(&payload.new_password, &user_model.password_hash) {
-        return Err("新密码不能与旧密码相同".to_string());
+        return Err("新密码不能与旧密码相同".into());
     }
 
     let mut active: user::ActiveModel = user_model.into();

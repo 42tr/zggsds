@@ -1,5 +1,7 @@
 use crate::auth::{hash_password, AuthUser};
+use crate::error::ApiError;
 use crate::models::user::{self, Entity as User};
+use axum::http::StatusCode;
 use axum::{extract::State, Json};
 use chrono::Utc;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
@@ -32,13 +34,46 @@ pub struct UserResponse {
     pub department_id: Option<i32>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct UserOption {
+    pub id: i32,
+    pub username: String,
+}
+
+// Business pages only need display names, not emails or account administration data.
+pub async fn list_user_options(
+    auth: AuthUser,
+    State(db): State<DatabaseConnection>,
+) -> Result<Json<Vec<UserOption>>, ApiError> {
+    let mut query = User::find().filter(user::Column::DeletedAt.is_null());
+    if !matches!(
+        auth.role.as_str(),
+        "admin" | "timekeeper" | "dept_manager" | "project_manager"
+    ) {
+        query = query.filter(user::Column::Id.eq(auth.user_id));
+    }
+    let users = query
+        .all(&db)
+        .await
+        .map_err(|_| ApiError(StatusCode::INTERNAL_SERVER_ERROR, "查询用户失败".into()))?;
+    Ok(Json(
+        users
+            .into_iter()
+            .map(|u| UserOption {
+                id: u.id,
+                username: u.username,
+            })
+            .collect(),
+    ))
+}
+
 pub async fn create_user(
     auth: AuthUser,
     State(db): State<DatabaseConnection>,
     Json(payload): Json<CreateUser>,
-) -> Result<Json<UserResponse>, String> {
+) -> Result<Json<UserResponse>, ApiError> {
     if auth.role != "admin" {
-        return Err("无权限".to_string());
+        return Err(ApiError(StatusCode::FORBIDDEN, "无权限".into()));
     }
     let password_hash = hash_password(&payload.password);
 
@@ -65,9 +100,9 @@ pub async fn create_user(
 pub async fn list_users(
     auth: AuthUser,
     State(db): State<DatabaseConnection>,
-) -> Result<Json<Vec<UserResponse>>, String> {
+) -> Result<Json<Vec<UserResponse>>, ApiError> {
     if auth.role != "admin" && auth.role != "timekeeper" && auth.role != "dept_manager" {
-        return Err("无权限".to_string());
+        return Err(ApiError(StatusCode::FORBIDDEN, "无权限".into()));
     }
     let users = User::find()
         .filter(user::Column::DeletedAt.is_null())
@@ -93,9 +128,9 @@ pub async fn delete_user(
     auth: AuthUser,
     State(db): State<DatabaseConnection>,
     axum::extract::Path(id): axum::extract::Path<i32>,
-) -> Result<Json<String>, String> {
+) -> Result<Json<String>, ApiError> {
     if auth.role != "admin" {
-        return Err("无权限".to_string());
+        return Err(ApiError(StatusCode::FORBIDDEN, "无权限".into()));
     }
     let user = User::find_by_id(id)
         .one(&db)
@@ -115,9 +150,9 @@ pub async fn update_user(
     State(db): State<DatabaseConnection>,
     axum::extract::Path(id): axum::extract::Path<i32>,
     Json(payload): Json<UpdateUser>,
-) -> Result<Json<UserResponse>, String> {
+) -> Result<Json<UserResponse>, ApiError> {
     if auth.role != "admin" {
-        return Err("无权限".to_string());
+        return Err(ApiError(StatusCode::FORBIDDEN, "无权限".into()));
     }
     let user = User::find_by_id(id)
         .one(&db)

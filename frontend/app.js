@@ -75,6 +75,9 @@ async function fetchWithAuth(url, options = {}) {
         logout();
         throw new Error('Unauthorized');
     }
+    if (!resp.ok) {
+        throw new Error((await readErrorText(resp)) || `请求失败 (${resp.status})`);
+    }
     return resp;
 }
 
@@ -97,47 +100,11 @@ async function fetchJsonWithAuth(url, options = {}) {
 }
 
 function getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user') || '{}');
-}
-
-function openChangePasswordModal() {
-    document.getElementById('cp-old-password').value = '';
-    document.getElementById('cp-new-password').value = '';
-    document.getElementById('cp-new-password2').value = '';
-    document.getElementById('change-password-modal').style.display = 'flex';
-}
-
-function closeChangePasswordModal() {
-    document.getElementById('change-password-modal').style.display = 'none';
-}
-
-async function changePassword() {
-    const oldPwd = document.getElementById('cp-old-password').value;
-    const newPwd = document.getElementById('cp-new-password').value;
-    const newPwd2 = document.getElementById('cp-new-password2').value;
-
-    if (newPwd.length < 6) {
-        alert('新密码至少 6 位');
-        return;
-    }
-    if (newPwd !== newPwd2) {
-        alert('两次输入的新密码不一致');
-        return;
-    }
-
-    const response = await fetchWithAuth(`${API_BASE}/auth/change-password`, {
-        method: 'PUT',
-        body: JSON.stringify({ old_password: oldPwd, new_password: newPwd })
-    });
-
-    const msg = await response.text();
-
-    if (response.ok) {
-        alert(msg.replace(/"/g, ''));
-        // 修改密码后强制重新登录
-        logout();
-    } else {
-        alert(('修改失败: ' + msg).replace(/"/g, ''));
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return user && typeof user === 'object' ? user : {};
+    } catch {
+        return {};
     }
 }
 
@@ -318,13 +285,25 @@ async function loadDashboard() {
     try {
         const month = document.getElementById('dashboard-month').value;
 
-    let timeUrl = `${API_BASE}/time-entries?page=1&page_size=9999`;
-    if (month) timeUrl += `&month=${month}`;
+    const loadEntries = async () => {
+        const entries = [];
+        let page = 1;
+        let totalPages = 1;
+        do {
+            const params = new URLSearchParams({ page: String(page), page_size: '100' });
+            if (month) params.set('month', month);
+            const result = await fetchJsonWithAuth(`${API_BASE}/time-entries?${params}`);
+            entries.push(...(Array.isArray(result) ? result : result.entries));
+            totalPages = result.total_pages || 1;
+            page++;
+        } while (page <= totalPages);
+        return entries;
+    };
 
     const [users, projects, timeEntriesResp] = await Promise.all([
-        fetchJsonWithAuth(`${API_BASE}/users`),
+        fetchJsonWithAuth(`${API_BASE}/users/options`),
         fetchJsonWithAuth(`${API_BASE}/projects`),
-        fetchJsonWithAuth(timeUrl)
+        loadEntries()
     ]);
 
     const timeEntries = Array.isArray(timeEntriesResp) ? timeEntriesResp : (timeEntriesResp.entries || []);
@@ -675,7 +654,7 @@ async function loadProjects() {
     try {
         const [projResp, usersResp] = await Promise.all([
         fetchWithAuth(`${API_BASE}/projects`),
-        fetchWithAuth(`${API_BASE}/users`)
+        fetchWithAuth(`${API_BASE}/users/options`)
     ]);
     const projects = await projResp.json();
     const users = await usersResp.json();
@@ -1107,7 +1086,7 @@ async function submitWeekEntries() {
 async function openEditProjectModal(projectId) {
     const [projResp, usersResp] = await Promise.all([
         fetchWithAuth(`${API_BASE}/projects`),
-        fetchWithAuth(`${API_BASE}/users`)
+        fetchWithAuth(`${API_BASE}/users/options`)
     ]);
     const projects = await projResp.json();
     const users = await usersResp.json();
@@ -1198,7 +1177,7 @@ async function loadTimeEntries() {
     const [response, projectsResp, usersResp] = await Promise.all([
         fetchWithAuth(url),
         fetchWithAuth(`${API_BASE}/projects`),
-        fetchWithAuth(`${API_BASE}/users`)
+        fetchWithAuth(`${API_BASE}/users/options`)
     ]);
 
     const data = await response.json();
@@ -1448,7 +1427,7 @@ async function loadApprovalsTime() {
 
     const [entriesResp, usersResp, projectsResp] = await Promise.all([
         fetchJsonWithAuth(`${API_BASE}/time-entries/pending`),
-        fetchJsonWithAuth(`${API_BASE}/users`),
+        fetchJsonWithAuth(`${API_BASE}/users/options`),
         fetchJsonWithAuth(`${API_BASE}/projects`)
     ]);
 

@@ -1,8 +1,12 @@
 mod auth;
 mod db;
 mod embed;
+mod error;
 mod handlers;
 mod models;
+
+#[cfg(test)]
+mod tests;
 
 use axum::{
     routing::{delete, get, post, put},
@@ -56,6 +60,7 @@ async fn main() {
             "/users/:id",
             delete(handlers::user::delete_user).put(handlers::user::update_user),
         )
+        .route("/users/options", get(handlers::user::list_user_options))
         // 项目管理：全员查看，timekeeper/admin 可增删改
         .route(
             "/projects",
