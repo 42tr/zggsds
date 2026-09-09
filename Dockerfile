@@ -1,7 +1,7 @@
 # Multi-stage build for minimal image size
 
 # Build stage
-FROM rust:1.83-slim AS builder
+FROM rust:1.88.0-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY Cargo.lock ./
 # Create dummy main.rs to cache dependencies
 RUN mkdir src && \
     echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
+    cargo build --release --locked && \
     rm -rf src
 
 # Copy source code
@@ -26,7 +26,7 @@ COPY frontend ./frontend
 
 # Build application
 RUN touch src/main.rs && \
-    cargo build --release
+    cargo build --release --locked
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -51,4 +51,3 @@ ENV RUST_LOG=info
 
 # Run application
 ENTRYPOINT ["./zggsds"]
-

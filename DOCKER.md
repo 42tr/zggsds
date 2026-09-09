@@ -2,6 +2,22 @@
 
 ## 镜像构建
 
+### GitHub Actions 发布
+
+仅推送 tag 时触发工作流；普通分支推送和 PR 不触发。
+Rust 格式检查、编译检查和测试通过后，构建 `linux/amd64`、`linux/arm64`
+双架构镜像，并推送到：
+
+- `ghcr.io/42tr/zggsds`
+- `crpi-gz6f3ok0ezphywc8.cn-shanghai.personal.cr.aliyuncs.com/42tr/zggsds`
+
+镜像标签为去掉开头 `v` 的 Git tag 和 `latest`，例如 `v0.0.2` 发布为
+`0.0.2` 和 `latest`。Git tag 应使用合法的 Docker 标签格式。
+
+在本仓库的 Actions Secrets 中配置 `ALIYUN_REGISTRY_USERNAME` 和
+`ALIYUN_REGISTRY_PASSWORD`，并确保该账号有目标 ACR 仓库的推送权限。
+GHCR 使用工作流自带的 `GITHUB_TOKEN`。
+
 ### 使用 Docker 构建
 
 ```bash
@@ -68,7 +84,7 @@ docker-compose down
 
 本项目使用多阶段构建（Multi-stage build）策略：
 
-1. **构建阶段** (rust:1.83-slim)
+1. **构建阶段** (rust:1.88.0-slim-bookworm，与 CI 的 Rust 版本一致)
    - 完整的 Rust 工具链
    - 构建依赖和二进制文件
    - 利用 Docker 缓存层加速构建
