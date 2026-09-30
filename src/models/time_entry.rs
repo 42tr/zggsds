@@ -22,6 +22,7 @@ pub struct Model {
     pub edit_allowed: i32,
     pub edit_requested: i32,
     pub modification_log: Option<String>,
+    pub reject_reason: Option<String>,
     pub created_at: DateTime,
     pub updated_at: DateTime,
 }

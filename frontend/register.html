@@ -6,18 +6,27 @@
   <title>注册 - 工时管理系统</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    body {
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .register-container {
+      width: 100%;
       max-width: 520px;
-      margin: 60px auto;
-      padding: 32px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      margin: 40px 16px;
+      padding: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
     }
     .register-container h1 {
       text-align: center;
       margin-bottom: 22px;
-      color: #667eea;
+      font-size: 22px;
+      color: var(--primary);
     }
     .row {
       display: flex;
@@ -28,21 +37,21 @@
     }
     button {
       width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 11px;
+      background: var(--primary);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius);
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
+      transition: background 0.15s;
     }
     button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.25);
+      background: var(--primary-dark);
     }
     .hint {
-      color: #666;
+      color: var(--text-muted);
       font-size: 13px;
       margin-top: 12px;
       line-height: 1.5;
@@ -51,10 +60,9 @@
       margin-top: 16px;
       display: flex;
       justify-content: space-between;
-      font-size: 14px;
-      color: #667eea;
+      font-size: 13px;
     }
-    .links a { color: #667eea; text-decoration: none; }
+    .links a { color: var(--primary); text-decoration: none; }
     .links a:hover { text-decoration: underline; }
   </style>
 </head>
@@ -65,28 +73,28 @@
     <form id="register-form">
       <div class="row">
         <div class="form-group">
-          <label>用户名:</label>
+          <label>用户名</label>
           <input type="text" id="reg-username" required />
         </div>
         <div class="form-group">
-          <label>邮箱:</label>
+          <label>邮箱</label>
           <input type="email" id="reg-email" required />
         </div>
       </div>
 
       <div class="row">
         <div class="form-group">
-          <label>密码:</label>
+          <label>密码</label>
           <input type="password" id="reg-password" required />
         </div>
         <div class="form-group">
-          <label>确认密码:</label>
+          <label>确认密码</label>
           <input type="password" id="reg-password2" required />
         </div>
       </div>
 
       <div class="form-group">
-        <label>部门:</label>
+        <label>部门</label>
         <select id="reg-dept" required></select>
       </div>
 

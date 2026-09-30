@@ -36,15 +36,15 @@
                     <h3>修改密码</h3>
                     <form id="change-password-form">
                         <div class="form-group">
-                            <label>旧密码:</label>
+                            <label>旧密码</label>
                             <input type="password" id="cp-old-password" required>
                         </div>
                         <div class="form-group">
-                            <label>新密码:</label>
+                            <label>新密码</label>
                             <input type="password" id="cp-new-password" required minlength="6" placeholder="至少6位">
                         </div>
                         <div class="form-group">
-                            <label>确认新密码:</label>
+                            <label>确认新密码</label>
                             <input type="password" id="cp-new-password2" required minlength="6">
                         </div>
                         <div class="form-actions">
@@ -62,19 +62,19 @@
                     <form id="edit-user-form">
                         <input type="hidden" id="edit-user-id">
                         <div class="form-group">
-                            <label>用户名:</label>
+                            <label>用户名</label>
                             <input type="text" id="edit-user-username" required>
                         </div>
                         <div class="form-group">
-                            <label>邮箱:</label>
+                            <label>邮箱</label>
                             <input type="email" id="edit-user-email" required>
                         </div>
                         <div class="form-group">
-                            <label>密码:</label>
+                            <label>密码</label>
                             <input type="password" id="edit-user-password" placeholder="不修改密码请留空">
                         </div>
                         <div class="form-group">
-                            <label>角色:</label>
+                            <label>角色</label>
                             <select id="edit-user-role" required>
                                 <option value="employee">员工</option>
                                 <option value="dept_manager">部门负责人</option>
@@ -84,7 +84,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>部门:</label>
+                            <label>部门</label>
                             <select id="edit-user-department-id">
                                 <option value="">无部门</option>
                             </select>
@@ -104,22 +104,22 @@
                     <form id="edit-time-entry-form">
                         <input type="hidden" id="edit-entry-id">
                         <div class="form-group">
-                            <label>项目:</label>
+                            <label>项目</label>
                             <select id="edit-entry-project-id" class="native-project-select">
                                 <option value="" disabled selected>请选择项目</option>
                             </select>
                             <div id="edit-entry-project-picker" class="project-picker"></div>
                         </div>
                         <div class="form-group">
-                            <label>日期:</label>
+                            <label>日期</label>
                             <input type="date" id="edit-entry-date" required>
                         </div>
                         <div class="form-group">
-                            <label>工时:</label>
+                            <label>工时</label>
                             <input type="number" step="0.5" id="edit-entry-hours" required min="0">
                         </div>
                         <div class="form-group">
-                            <label>描述:</label>
+                            <label>描述</label>
                             <textarea id="edit-entry-description" required></textarea>
                         </div>
                         <div class="form-actions">
@@ -137,15 +137,15 @@
                     <form id="edit-project-form">
                         <input type="hidden" id="edit-project-id">
                         <div class="form-group">
-                            <label>项目编号:</label>
+                            <label>项目编号</label>
                             <input type="text" id="edit-project-no" placeholder="可选">
                         </div>
                         <div class="form-group">
-                            <label>项目名称:</label>
+                            <label>项目名称</label>
                             <input type="text" id="edit-project-name" required>
                         </div>
                         <div class="form-group">
-                            <label>项目类型:</label>
+                            <label>项目类型</label>
                             <select id="edit-project-type" required>
                                 <option value="交付">交付</option>
                                 <option value="研发">研发</option>
@@ -155,7 +155,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>项目状态:</label>
+                            <label>项目状态</label>
                             <select id="edit-project-status" required>
                                 <option value="进行中">进行中</option>
                                 <option value="完结">完结</option>
@@ -164,17 +164,17 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>项目周期:</label>
+                            <label>项目周期</label>
                             <input type="text" id="edit-project-cycle" placeholder="如：2026-01 至 2026-06">
                         </div>
                         <div class="form-group">
-                            <label>项目负责人:</label>
+                            <label>项目负责人</label>
                             <select id="edit-project-owner">
                                 <option value="">请选择</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>项目描述:</label>
+                            <label>项目描述</label>
                             <textarea id="edit-project-description"></textarea>
                         </div>
                         <div class="form-actions">
@@ -192,11 +192,11 @@
                     <form id="edit-dept-form">
                         <input type="hidden" id="edit-dept-id">
                         <div class="form-group">
-                            <label>部门名称:</label>
+                            <label>部门名称</label>
                             <input type="text" id="edit-dept-name" required>
                         </div>
                         <div class="form-group">
-                            <label>上级部门:</label>
+                            <label>上级部门</label>
                             <select id="edit-dept-parent-id">
                                 <option value="">无上级部门</option>
                             </select>
@@ -253,22 +253,22 @@
                 <div id="single-entry-panel">
                     <form id="time-entry-form">
                         <div class="form-group">
-                            <label>项目:</label>
+                            <label>项目</label>
                             <select id="entry-project-id" class="native-project-select">
                                 <option value="" disabled selected>请选择项目</option>
                             </select>
                             <div id="entry-project-picker" class="project-picker"></div>
                         </div>
                         <div class="form-group">
-                            <label>日期:</label>
+                            <label>日期</label>
                             <input type="date" id="entry-date" required>
                         </div>
                         <div class="form-group">
-                            <label>工时:</label>
+                            <label>工时</label>
                             <input type="number" step="0.5" id="entry-hours" required min="0">
                         </div>
                         <div class="form-group">
-                            <label>描述:</label>
+                            <label>描述</label>
                             <textarea id="entry-description" required></textarea>
                         </div>
                         <button type="submit">提交工时</button>
@@ -278,12 +278,12 @@
                 <div id="weekly-entry-panel" class="hidden">
                     <div class="filter-section week-toolbar">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>周起始日（周一）:</label>
+                            <label>周起始日（周一）</label>
                             <input type="date" id="week-start-date">
                         </div>
-                        <button type="button" onclick="copyLastWeekToGrid()" style="background: #17a2b8;">复制上周</button>
+                        <button type="button" onclick="copyLastWeekToGrid()">复制上周</button>
                         <button type="button" onclick="addWeekRow()">新增项目行</button>
-                        <button type="button" onclick="submitWeekEntries()" style="background: #28a745;">提交本周工时</button>
+                        <button type="button" class="btn-accent" onclick="submitWeekEntries()">提交本周工时</button>
                     </div>
                     <div id="week-range-tip" class="week-range-tip"></div>
                     <div class="week-grid-wrap">
@@ -325,34 +325,34 @@
                 </div>
 
                 <h3>工时记录</h3>
-                <div class="filter-section" style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; border: 1px solid #dee2e6;">
-                    <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="filter-section" style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>用户:</label>
+                            <label>用户</label>
                             <select id="filter-user-id" style="min-width: 150px;">
                                 <option value="">全部</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>项目:</label>
+                            <label>项目</label>
                             <select id="filter-project-id" style="min-width: 150px;">
                                 <option value="">全部</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>所属月份:</label>
+                            <label>所属月份</label>
                             <input type="month" id="filter-month">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>开始日期:</label>
+                            <label>开始日期</label>
                             <input type="date" id="filter-start-date">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>结束日期:</label>
+                            <label>结束日期</label>
                             <input type="date" id="filter-end-date">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
-                            <label>每页显示:</label>
+                            <label>每页显示</label>
                             <select id="page-size">
                                 <option value="10">10</option>
                                 <option value="20">20</option>
@@ -360,9 +360,9 @@
                             </select>
                         </div>
                         <button type="button" onclick="loadTimeEntries()">查询</button>
-                        <button type="button" onclick="filterLastWeek()" style="background: #17a2b8;">上周工时</button>
-                        <button type="button" onclick="clearTimeEntryFilter()" style="background: #6c757d;">重置</button>
-                        <button type="button" onclick="exportTimeEntries()" style="background: #28a745;">导出Excel</button>
+                        <button type="button" onclick="filterLastWeek()">上周工时</button>
+                        <button type="button" onclick="clearTimeEntryFilter()">重置</button>
+                        <button type="button" class="btn-accent" onclick="exportTimeEntries()">导出Excel</button>
                     </div>
                 </div>
 
@@ -383,11 +383,11 @@
                     <tbody></tbody>
                 </table>
 
-                <div class="pagination" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="pagination">
                     <span id="pagination-info"></span>
                     <div style="display: flex; gap: 10px;">
-                        <button type="button" id="prev-page" onclick="prevPage()" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">上一页</button>
-                        <button type="button" id="next-page" onclick="nextPage()" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">下一页</button>
+                        <button type="button" id="prev-page" onclick="prevPage()">上一页</button>
+                        <button type="button" id="next-page" onclick="nextPage()">下一页</button>
                     </div>
                 </div>
             </section>
@@ -400,15 +400,15 @@
                     <form id="project-form">
                         <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目编号:</label>
+                                <label>项目编号</label>
                                 <input type="text" id="project-no" placeholder="可选">
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目名称:</label>
+                                <label>项目名称</label>
                                 <input type="text" id="project-name" required>
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目类型:</label>
+                                <label>项目类型</label>
                                 <select id="project-type" required>
                                     <option value="交付">交付</option>
                                     <option value="研发">研发</option>
@@ -418,7 +418,7 @@
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目状态:</label>
+                                <label>项目状态</label>
                                 <select id="project-status" required>
                                     <option value="进行中">进行中</option>
                                     <option value="完结">完结</option>
@@ -427,17 +427,17 @@
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目周期:</label>
+                                <label>项目周期</label>
                                 <input type="text" id="project-cycle" placeholder="如：2026-01 至 2026-06">
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>项目负责人:</label>
+                                <label>项目负责人</label>
                                 <select id="project-owner">
                                     <option value="">请选择</option>
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom:0">
-                                <label>描述:</label>
+                                <label>描述</label>
                                 <textarea id="project-description" style="height:36px;"></textarea>
                             </div>
                             <button type="submit">创建项目</button>
@@ -469,11 +469,11 @@
                 <div id="department-form-wrap">
                     <form id="department-form">
                         <div class="form-group">
-                            <label>部门名称:</label>
+                            <label>部门名称</label>
                             <input type="text" id="dept-name" required>
                         </div>
                         <div class="form-group">
-                            <label>上级部门:</label>
+                            <label>上级部门</label>
                             <select id="dept-parent-id">
                                 <option value="">无上级部门</option>
                             </select>
@@ -491,19 +491,19 @@
                 <h2>用户管理</h2>
                 <form id="user-form">
                     <div class="form-group">
-                        <label>用户名:</label>
+                        <label>用户名</label>
                         <input type="text" id="user-username" required>
                     </div>
                     <div class="form-group">
-                        <label>邮箱:</label>
+                        <label>邮箱</label>
                         <input type="email" id="user-email" required>
                     </div>
                     <div class="form-group">
-                        <label>密码:</label>
+                        <label>密码</label>
                         <input type="password" id="user-password" required>
                     </div>
                     <div class="form-group">
-                        <label>角色:</label>
+                        <label>角色</label>
                         <select id="user-role" required>
                             <option value="employee">员工</option>
                             <option value="dept_manager">部门负责人</option>
@@ -513,7 +513,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>部门:</label>
+                        <label>部门</label>
                         <select id="user-department-id">
                             <option value="">无部门</option>
                         </select>
@@ -541,17 +541,28 @@
             <section id="approvals">
                 <h2>审批管理</h2>
 
-                <div style="display:flex; gap:8px; margin: 10px 0; flex-wrap: wrap;">
+                <div class="approval-tabs">
                     <button type="button" id="btn-approval-time" onclick="switchApprovalTab('time')">工时审批</button>
                     <button type="button" id="btn-approval-register" onclick="switchApprovalTab('register')">注册审批</button>
                 </div>
 
                 <div style="margin-bottom: 10px;">
-                    <span id="approval-stage-tip" style="color:#6c757d; font-size: 13px;"></span>
+                    <span id="approval-stage-tip" style="color: var(--text-muted); font-size: 13px;"></span>
                 </div>
 
                 <!-- 工时审批表 -->
+                <div class="table-scroll">
                 <table id="approvals-table">
+                    <colgroup>
+                        <col style="width:56px">
+                        <col style="width:80px">
+                        <col style="width:190px">
+                        <col style="width:100px">
+                        <col style="width:56px">
+                        <col>
+                        <col style="width:200px">
+                        <col style="width:172px">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -566,9 +577,20 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+                </div>
 
                 <!-- 注册审批表 -->
+                <div class="table-scroll">
                 <table id="reg-approvals-table" style="display:none; margin-top: 10px;">
+                    <colgroup>
+                        <col style="width:56px">
+                        <col style="width:120px">
+                        <col>
+                        <col style="width:150px">
+                        <col style="width:170px">
+                        <col style="width:90px">
+                        <col style="width:150px">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -582,6 +604,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+                </div>
             </section>
         </main>
     </div>

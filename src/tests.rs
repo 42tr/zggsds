@@ -63,6 +63,7 @@ async fn database() -> DatabaseConnection {
             edit_allowed: 0,
             edit_requested: 0,
             modification_log: None,
+            reject_reason: None,
             created_at: now,
             updated_at: now,
         }

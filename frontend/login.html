@@ -6,41 +6,51 @@
     <title>登录 - 工时管理系统</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        body {
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .login-container {
+            width: 100%;
             max-width: 400px;
-            margin: 100px auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin: 40px 16px;
+            padding: 36px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
         }
         .login-container h1 {
             text-align: center;
-            margin-bottom: 30px;
-            color: #667eea;
+            margin-bottom: 28px;
+            font-size: 22px;
+            color: var(--primary);
         }
         .login-container .form-group {
             margin-bottom: 20px;
         }
         .login-container button {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 11px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--radius);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
+            transition: background 0.15s;
         }
         .login-container button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: var(--primary-dark);
         }
         .login-container .register-link {
             text-align: center;
             margin-top: 16px;
-            color: #667eea;
+            font-size: 13px;
+            color: var(--primary);
             cursor: pointer;
         }
         .login-container .register-link:hover {
@@ -53,11 +63,11 @@
         <h1>工时管理系统</h1>
         <form id="login-form">
             <div class="form-group">
-                <label>用户名:</label>
+                <label>用户名</label>
                 <input type="text" id="login-username" required>
             </div>
             <div class="form-group">
-                <label>密码:</label>
+                <label>密码</label>
                 <input type="password" id="login-password" required>
             </div>
             <button type="submit">登录</button>

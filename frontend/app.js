@@ -349,8 +349,10 @@ async function loadUsers() {
             <td>${escapeHtml(ROLE_MAP[user.role] || user.role)}</td>
             <td>${escapeHtml(user.department_id ? (deptMap[user.department_id] || '-') : '-')}</td>
             <td>
-                <button onclick="openEditUserModal(${user.id})" style="padding:4px 8px;font-size:12px;background:#17a2b8;color:white;border:none;border-radius:3px;cursor:pointer;margin-right:5px;">编辑</button>
-                <button onclick="deleteUser(${user.id})" style="padding:4px 8px;font-size:12px;background:#dc3545;color:white;border:none;border-radius:3px;cursor:pointer;">删除</button>
+                <div class="row-actions">
+                    <button class="btn-sm" onclick="openEditUserModal(${user.id})">编辑</button>
+                    <button class="btn-sm btn-danger" onclick="deleteUser(${user.id})">删除</button>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -683,8 +685,10 @@ async function loadProjects() {
             <td>${escapeHtml(p.owner || '-')}</td>
             <td>${escapeHtml(p.description || '-')}</td>
             ${canEdit ? `<td>
-                <button onclick="openEditProjectModal(${p.id})" style="padding:4px 8px;font-size:12px;background:#17a2b8;color:white;border:none;border-radius:3px;cursor:pointer;margin-right:5px;">编辑</button>
-                <button onclick="deleteProject(${p.id})" style="padding:4px 8px;font-size:12px;background:#dc3545;color:white;border:none;border-radius:3px;cursor:pointer;">删除</button>
+                <div class="row-actions">
+                    <button class="btn-sm" onclick="openEditProjectModal(${p.id})">编辑</button>
+                    <button class="btn-sm btn-danger" onclick="deleteProject(${p.id})">删除</button>
+                </div>
             </td>` : ''}
         </tr>
     `).join('');
@@ -1229,24 +1233,28 @@ async function loadTimeEntries() {
                 const logs = JSON.parse(entry.modification_log);
                 if (logs.length > 0) {
                     const encodedLog = encodeURIComponent(JSON.stringify(logs)).replace(/'/g, '%27');
-                    modLogCell = `<a href="javascript:void(0)" onclick="showModLogEncoded('${encodedLog}')" style="color:var(--primary);font-size:12px;">共${logs.length}次</a>`;
+                    modLogCell = `<a href="javascript:void(0)" class="link-text" onclick="showModLogEncoded('${encodedLog}')">共${logs.length}次</a>`;
                 }
             } catch(e) { /* ignore */ }
         }
 
         let buttons = '';
         if (canEdit) {
-            buttons += `<button onclick="openEditTimeEntryModal(${entry.id})" style="padding:4px 8px;font-size:12px;background:#17a2b8;color:white;border:none;border-radius:3px;cursor:pointer;margin-right:4px;">编辑</button>`;
+            buttons += `<button class="btn-sm" onclick="openEditTimeEntryModal(${entry.id})">编辑</button>`;
         }
         if (canDelete) {
-            buttons += `<button onclick="deleteTimeEntry(${entry.id})" style="padding:4px 8px;font-size:12px;background:#dc3545;color:white;border:none;border-radius:3px;cursor:pointer;margin-right:4px;">撤回</button>`;
+            buttons += `<button class="btn-sm btn-danger" onclick="deleteTimeEntry(${entry.id})">撤回</button>`;
         }
         if (canRequestEdit) {
-            buttons += `<button onclick="requestEdit(${entry.id})" style="padding:4px 8px;font-size:12px;background:#ffc107;color:#212529;border:none;border-radius:3px;cursor:pointer;">申请修改</button>`;
+            buttons += `<button class="btn-sm btn-warning" onclick="requestEdit(${entry.id})">申请修改</button>`;
         }
         if (isOwn && entry.edit_requested === 1 && entry.status !== 'rejected') {
-            buttons += `<span style="font-size:12px;color:#92400e;background:#fef3c7;padding:3px 8px;border-radius:3px;">已申请修改</span>`;
+            buttons += `<span class="tag-warning">已申请修改</span>`;
         }
+
+        const rejectReasonHtml = (entry.status === 'rejected' && entry.reject_reason)
+            ? `<div class="reject-reason" title="${escapeHtml(entry.reject_reason)}">原因：${escapeHtml(entry.reject_reason)}</div>`
+            : '';
 
         return `
             <tr>
@@ -1256,9 +1264,9 @@ async function loadTimeEntries() {
                 <td>${escapeHtml(entry.project_id ? (projectNameMap[entry.project_id] || '-') : '-')}</td>
                 <td>${entry.hours}</td>
                 <td>${escapeHtml(entry.description)}</td>
-                <td class="${statusClass}">${escapeHtml(statusLabel)}</td>
+                <td class="status-cell"><span class="${statusClass}">${escapeHtml(statusLabel)}</span>${rejectReasonHtml}</td>
                 <td>${modLogCell}</td>
-                <td>${buttons}</td>
+                <td><div class="row-actions">${buttons}</div></td>
             </tr>
         `;
     }).join('');
@@ -1452,20 +1460,20 @@ async function loadApprovalsTime() {
 
         let buttons = '';
         if (entry.status === 'pending' && canFirstApprove) {
-            buttons += `<button class="approve-btn" onclick="approveEntry(${entry.id}, 'approved')" style="margin-right:4px;">通过</button>`;
+            buttons += `<button class="approve-btn" onclick="approveEntry(${entry.id}, 'approved')">通过</button>`;
             buttons += `<button class="reject-btn" onclick="approveEntry(${entry.id}, 'rejected')">驳回</button>`;
         }
         if (entry.status === 'dept_approved' && canSecondApprove) {
-            buttons += `<button class="approve-btn" onclick="secondApproveEntry(${entry.id}, 'approved')" style="margin-right:4px;">二审通过</button>`;
+            buttons += `<button class="approve-btn" onclick="secondApproveEntry(${entry.id}, 'approved')">二审通过</button>`;
             buttons += `<button class="reject-btn" onclick="secondApproveEntry(${entry.id}, 'rejected')">二审驳回</button>`;
         }
         if (entry.edit_requested === 1 && canAllowEdit) {
-            buttons += ` <button onclick="allowEdit(${entry.id})" style="padding:4px 8px;font-size:12px;background:#6610f2;color:white;border:none;border-radius:3px;cursor:pointer;margin-left:4px;">放开修改</button>`;
-            buttons += ` <button onclick="denyEdit(${entry.id})" style="padding:4px 8px;font-size:12px;background:#dc3545;color:white;border:none;border-radius:3px;cursor:pointer;margin-left:4px;">拒绝修改</button>`;
+            buttons += `<button class="edit-allow-btn" onclick="allowEdit(${entry.id})">放开修改</button>`;
+            buttons += `<button class="edit-deny-btn" onclick="denyEdit(${entry.id})">拒绝修改</button>`;
         }
 
         const editRequestedTag = entry.edit_requested === 1
-            ? ' <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:100px;">申请修改</span>'
+            ? '<span class="edit-tag">申请修改</span>'
             : '';
 
         return `
@@ -1475,9 +1483,9 @@ async function loadApprovalsTime() {
                 <td>${escapeHtml(entry.project_id ? (projectMap[entry.project_id] || '-') : '-')}</td>
                 <td>${entry.work_date}</td>
                 <td>${entry.hours}</td>
-                <td>${escapeHtml(entry.description)}</td>
-                <td class="${statusClass}">${escapeHtml(statusLabel)}${editRequestedTag}</td>
-                <td>${buttons}</td>
+                <td class="desc-cell" title="${escapeHtml(entry.description)}">${escapeHtml(entry.description)}</td>
+                <td class="status-cell"><span class="${statusClass}">${escapeHtml(statusLabel)}</span>${editRequestedTag}</td>
+                <td><div class="row-actions">${buttons}</div></td>
             </tr>
         `;
     }).join('');
@@ -1519,7 +1527,7 @@ async function loadApprovalsRegister() {
 
         let buttons = '';
         // dept_manager 的权限在后端会再次校验
-        buttons += `<button class="approve-btn" onclick="approveRegistration(${r.id})" style="margin-right:4px;">通过</button>`;
+        buttons += `<button class="approve-btn" onclick="approveRegistration(${r.id})">通过</button>`;
         buttons += `<button class="reject-btn" onclick="rejectRegistration(${r.id})">驳回</button>`;
 
         return `
@@ -1530,7 +1538,7 @@ async function loadApprovalsRegister() {
             <td>${escapeHtml(deptLabel)}</td>
             <td>${escapeHtml(assignee)}</td>
             <td>${escapeHtml(r.status)}</td>
-            <td>${buttons}</td>
+            <td><div class="row-actions">${buttons}</div></td>
           </tr>
         `;
     }).join('');
@@ -1574,10 +1582,26 @@ async function loadApprovals() {
     switchApprovalTab(currentApprovalTab || 'time');
 }
 
+function askRejectReason() {
+    const reason = prompt('请输入驳回理由：');
+    if (reason === null) return null; // 取消
+    const trimmed = reason.trim();
+    if (!trimmed) {
+        alert('驳回时必须填写驳回理由');
+        return null;
+    }
+    return trimmed;
+}
+
 async function approveEntry(id, status) {
+    let reason;
+    if (status === 'rejected') {
+        reason = askRejectReason();
+        if (reason === null) return;
+    }
     const response = await fetchWithAuth(`${API_BASE}/time-entries/${id}/approve`, {
         method: 'PUT',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, reason })
     });
     const msg = await response.text();
     if (response.ok) {
@@ -1591,9 +1615,14 @@ async function approveEntry(id, status) {
 }
 
 async function secondApproveEntry(id, status) {
+    let reason;
+    if (status === 'rejected') {
+        reason = askRejectReason();
+        if (reason === null) return;
+    }
     const response = await fetchWithAuth(`${API_BASE}/time-entries/${id}/second-approve`, {
         method: 'PUT',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, reason })
     });
     const msg = await response.text();
     if (response.ok) {
@@ -1675,12 +1704,12 @@ async function loadDepartmentTree() {
         if (depts.length === 0) return '<p>暂无部门</p>';
         let html = '<ul>';
         depts.forEach(d => {
-            const indent = 'padding-left: ' + (level * 20) + 'px;';
+            const indent = 'margin-left: ' + (level * 24) + 'px;';
             html += `
-                <li style="margin: 8px 0;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="${indent} font-weight: 500;">${escapeHtml(d.name)}</span>
-                        ${canEdit ? `<button onclick="openEditDeptModal(${d.id})" style="padding:2px 8px;font-size:12px;background:#17a2b8;color:white;border:none;border-radius:3px;cursor:pointer;margin-right:4px;">编辑</button><button onclick="deleteDepartment(${d.id})" style="padding:2px 8px;font-size:12px;background:#dc3545;color:white;border:none;border-radius:3px;cursor:pointer;">删除</button>` : ''}
+                <li>
+                    <div class="dept-node" style="${indent}">
+                        <span class="dept-name">${escapeHtml(d.name)}</span>
+                        ${canEdit ? `<button class="btn-sm" onclick="openEditDeptModal(${d.id})">编辑</button><button class="btn-sm btn-danger" onclick="deleteDepartment(${d.id})">删除</button>` : ''}
                     </div>
                     ${d.children && d.children.length > 0 ? renderTree(d.children, level + 1) : ''}
                 </li>

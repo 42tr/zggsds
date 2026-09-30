@@ -118,6 +118,9 @@ nav button.active {
 main {
     padding: 28px 24px;
     flex: 1;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
 }
 
 section {
@@ -159,6 +162,12 @@ h3 {
     border-radius: var(--radius);
     padding: 20px 24px;
     box-shadow: var(--shadow);
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
 }
 
 .stat-card h3 {
@@ -512,13 +521,18 @@ button[type="submit"]:hover {
 }
 
 .week-row-remove {
-    background: #dc3545;
+    background: var(--danger);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius);
     padding: 5px 10px;
     cursor: pointer;
     font-size: 12px;
+    transition: opacity 0.15s;
+}
+
+.week-row-remove:hover {
+    opacity: 0.85;
 }
 
 /* ===== 表格 ===== */
@@ -560,34 +574,28 @@ tbody tr:hover {
     background: #fafbfc;
 }
 
-/* ===== 状态徽章 ===== */
+/* ===== 状态徽章（仅作用于 span，避免套在 td 上破坏表格布局）===== */
 
-.pending {
+span.pending, span.approved, span.rejected {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 100px;
     font-size: 12px;
     font-weight: 500;
+    white-space: nowrap;
+}
+
+span.pending {
     background: #fef3c7;
     color: #92400e;
 }
 
-.approved {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 500;
+span.approved {
     background: #dcfce7;
     color: #166534;
 }
 
-.rejected {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 500;
+span.rejected {
     background: #fee2e2;
     color: #991b1b;
 }
@@ -675,12 +683,18 @@ tbody tr:hover {
 .modal-content {
     background: var(--surface);
     padding: 24px;
-    border-radius: 8px;
+    border-radius: 10px;
     width: 90%;
     max-width: 480px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    animation: modal-in 0.15s ease;
+}
+
+@keyframes modal-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: none; }
 }
 
 .modal-content h3 {
@@ -713,6 +727,209 @@ tbody tr:hover {
 .form-actions button[type="button"]:hover {
     border-color: var(--text-muted);
     color: var(--text);
+}
+
+/* ===== 审批管理 ===== */
+
+.approval-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 14px;
+    flex-wrap: wrap;
+}
+
+.approval-tabs button {
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+}
+
+.approval-tabs button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.approval-tabs button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+#approvals-table,
+#reg-approvals-table {
+    table-layout: fixed;
+    min-width: 960px;
+}
+
+#approvals-table td,
+#reg-approvals-table td {
+    overflow: hidden;
+}
+
+#approvals-table .desc-cell {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.status-cell {
+    white-space: nowrap;
+}
+
+.reject-reason {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--danger);
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-cell .edit-tag {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 11px;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 1px 6px;
+    border-radius: 100px;
+}
+
+.row-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.row-actions button {
+    flex: none;
+    white-space: nowrap;
+}
+
+.edit-allow-btn,
+.edit-deny-btn {
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.edit-allow-btn {
+    background: #6610f2;
+}
+
+.edit-deny-btn {
+    background: var(--danger);
+}
+
+.edit-allow-btn:hover,
+.edit-deny-btn:hover {
+    opacity: 0.85;
+}
+
+/* ===== 通用小按钮（表格操作列、部门树等） ===== */
+
+.btn-sm {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #fff;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+
+.btn-sm:hover {
+    opacity: 0.85;
+}
+
+.btn-sm.btn-danger {
+    background: var(--danger);
+}
+
+.btn-sm.btn-warning {
+    background: var(--warning);
+}
+
+/* 筛选区里的强调按钮（如：导出Excel、提交本周工时） */
+.filter-section button[type="button"].btn-accent {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+}
+
+.filter-section button[type="button"].btn-accent:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
+}
+
+/* 状态小标签 */
+.tag-warning {
+    display: inline-block;
+    font-size: 12px;
+    color: #92400e;
+    background: #fef3c7;
+    padding: 3px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+/* 文字链接按钮（如：修改记录） */
+.link-text {
+    color: var(--primary);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.link-text:hover {
+    text-decoration: underline;
+}
+
+/* ===== 部门树 ===== */
+
+#department-tree ul {
+    list-style: none;
+}
+
+#department-tree li {
+    margin: 6px 0;
+}
+
+.dept-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: border-color 0.15s;
+}
+
+.dept-node:hover {
+    border-color: var(--primary);
+}
+
+.dept-name {
+    font-weight: 500;
 }
 
 /* ===== 辅助 ===== */

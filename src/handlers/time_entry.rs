@@ -42,6 +42,27 @@ pub struct CreateTimeEntriesBatch {
 #[derive(Deserialize)]
 pub struct UpdateStatus {
     pub status: String,
+    pub reason: Option<String>,
+}
+
+fn validated_reject_reason(payload: &UpdateStatus) -> Result<Option<String>, String> {
+    if payload.status == "rejected" {
+        let reason = payload
+            .reason
+            .as_deref()
+            .map(str::trim)
+            .unwrap_or("")
+            .to_string();
+        if reason.is_empty() {
+            return Err("驳回时必须填写驳回理由".to_string());
+        }
+        if reason.chars().count() > 500 {
+            return Err("驳回理由不能超过500字".to_string());
+        }
+        Ok(Some(reason))
+    } else {
+        Ok(None)
+    }
 }
 
 #[derive(Deserialize)]
@@ -79,6 +100,7 @@ pub struct TimeEntryResponse {
     pub edit_allowed: i32,
     pub edit_requested: i32,
     pub modification_log: Option<String>,
+    pub reject_reason: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -242,6 +264,7 @@ fn to_response(e: time_entry::Model) -> TimeEntryResponse {
         edit_allowed: e.edit_allowed,
         edit_requested: e.edit_requested,
         modification_log: e.modification_log,
+        reject_reason: e.reject_reason,
     }
 }
 
@@ -423,6 +446,7 @@ pub async fn approve_time_entry(
     if payload.status != "approved" && payload.status != "rejected" {
         return Err("非法审批状态".to_string());
     }
+    let reject_reason = validated_reject_reason(&payload)?;
 
     let entry = TimeEntry::find_by_id(id)
         .one(&db)
@@ -489,6 +513,7 @@ pub async fn approve_time_entry(
     } else {
         active.status = Set(payload.status.clone());
     }
+    active.reject_reason = Set(reject_reason);
     active.approved_by = Set(Some(auth.user_id));
     active.approved_at = Set(Some(now));
     active.updated_at = Set(now);
@@ -511,6 +536,11 @@ pub async fn second_approve_time_entry(
     if auth.role != "admin" && auth.role != "project_manager" && auth.role != "dept_manager" {
         return Err("无权限：仅项目负责人或管理员可进行二审".to_string());
     }
+
+    if payload.status != "approved" && payload.status != "rejected" {
+        return Err("非法审批状态".to_string());
+    }
+    let reject_reason = validated_reject_reason(&payload)?;
 
     let entry = TimeEntry::find_by_id(id)
         .one(&db)
@@ -552,6 +582,7 @@ pub async fn second_approve_time_entry(
 
     let mut active: time_entry::ActiveModel = entry.into();
     active.status = Set(final_status.to_string());
+    active.reject_reason = Set(reject_reason);
     active.second_approved_by = Set(Some(auth.user_id));
     active.second_approved_at = Set(Some(now));
     active.second_status = Set(Some(payload.status));
@@ -963,6 +994,7 @@ pub async fn export_time_entries(
         "工时",
         "描述",
         "状态",
+        "驳回理由",
     ];
     for (col, header) in headers.iter().enumerate() {
         worksheet
@@ -1022,6 +1054,14 @@ pub async fn export_time_entries(
             .unwrap();
         worksheet
             .write_string_with_format(row, 7, status_label, &border_format)
+            .unwrap();
+        worksheet
+            .write_string_with_format(
+                row,
+                8,
+                entry.reject_reason.as_deref().unwrap_or(""),
+                &border_format,
+            )
             .unwrap();
     }
 

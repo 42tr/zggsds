@@ -59,6 +59,7 @@ pub async fn init_database(db: &sea_orm::DatabaseConnection) {
             edit_allowed INTEGER NOT NULL DEFAULT 0,
             edit_requested INTEGER NOT NULL DEFAULT 0,
             modification_log TEXT,
+            reject_reason TEXT,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id),
@@ -114,6 +115,7 @@ pub async fn init_database(db: &sea_orm::DatabaseConnection) {
         "ALTER TABLE time_entries ADD COLUMN edit_allowed INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE time_entries ADD COLUMN edit_requested INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE time_entries ADD COLUMN modification_log TEXT",
+        "ALTER TABLE time_entries ADD COLUMN reject_reason TEXT",
         // registration_requests 的增量字段（老库里没有则补；有则忽略错误）
         "ALTER TABLE registration_requests ADD COLUMN assigned_approver_role TEXT",
         "ALTER TABLE registration_requests ADD COLUMN assigned_approver_id INTEGER",
